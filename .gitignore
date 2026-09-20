@@ -1,0 +1,26 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# Runtime artifacts
+logs/
+*.log
+
+# macOS
+.DS_Store
+
+# 本机凭据 / 本地配置（不要提交）
+config.json
+config.local.json
+*.local.json
+app_secret
+
+# Codex 本地配置 / 命令规则（仅本机生效，不要提交）
+.codex/
