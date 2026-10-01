@@ -1,9 +1,12 @@
-"""往飞书群里发消息 / 改写已发出的消息（飞书官方 SDK）。
+"""往飞书聊天里发消息 / 改写已发出的消息（飞书官方 SDK）。
 
 发出去的形态: markdown 整段塞进 post 的 md 元素, 渲染交给服务端。
 （这个形态是照着 lark-cli 的 --dry-run 输出复刻的, 不是猜的 —— 换实现时最容易在这里走样。）
 
 异步: SDK 的 acreate/aupdate 本身就是协程, 不需要线程。
+
+收件人一律用 `receive_id_type=chat_id` + chat_id: 群聊和私聊都是同一个口子
+（私聊的 chat_id 与该用户一一对应, 见 lark_chat / harness.ChatSessions 的 chat_id）。
 
 凭据文件里可选 `domain`（默认飞书国内站）:
   国内飞书   https://open.feishu.cn（默认）
@@ -36,6 +39,9 @@ class LarkSender:
 
     send 成功返回 message_id（失败返回 None）, edit 成功返回 True。
     text 与 markdown 二选一。
+
+    日志里带上 chat_id: 群和私聊的发送交织在一起时（同一个机器人同时服务多个会话）,
+    只看一个 message_id 分不出这条发给了谁。
     """
 
     def __init__(self, config: dict) -> None:
@@ -55,20 +61,23 @@ class LarkSender:
                .receive_id_type("chat_id").request_body(body).build())
         resp = await self._client.im.v1.message.acreate(req)
         if not resp.success() or not resp.data:
-            sys.stderr.write(f"[bot] 发送失败: code={resp.code} msg={resp.msg!r}\n")
+            sys.stderr.write(f"[bot] 发送失败 chat_id={chat_id}: "
+                             f"code={resp.code} msg={resp.msg!r}\n")
             return None
         message_id = resp.data.message_id
-        sys.stderr.write(f"[bot] 消息发送成功 {message_id}\n")
+        sys.stderr.write(f"[bot] 消息发送成功 chat_id={chat_id} {message_id}\n")
         return message_id
 
-    async def edit(self, message_id: str, *, text: str | None = None,
-                   markdown: str | None = None) -> bool:
+    async def edit(self, message_id: str, *, chat_id: str | None = None,
+                   text: str | None = None, markdown: str | None = None) -> bool:
+        """改写已发出的消息; chat_id 只给日志用（这个接口按 message_id 定位, 用不到它）。"""
         msg_type, content = _content(markdown, text)
         body = (UpdateMessageRequestBody.builder()
                 .msg_type(msg_type).content(content).build())
         req = UpdateMessageRequest.builder().message_id(message_id).request_body(body).build()
         resp = await self._client.im.v1.message.aupdate(req)
         if not resp.success():
-            sys.stderr.write(f"[bot] 改写失败: code={resp.code} msg={resp.msg!r}\n")
+            sys.stderr.write(f"[bot] 改写失败 chat_id={chat_id or '-'} {message_id}: "
+                             f"code={resp.code} msg={resp.msg!r}\n")
             return False
         return True

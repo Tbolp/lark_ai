@@ -68,6 +68,11 @@ def registered() -> dict[str, list[str]]:
             for name, handlers in _HANDLERS.items()}
 
 
+def reset() -> None:
+    """清掉所有注册的 handler（测试用: 一条用例跑完不留全局状态）。"""
+    _HANDLERS.clear()
+
+
 # ---------- 后台协程的生命周期 ----------
 
 async def cancel_all() -> None:

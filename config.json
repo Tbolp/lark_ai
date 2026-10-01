@@ -1,0 +1,33 @@
+{
+  "chats": [
+    "oc_01862e3093bceffe31c58baab4886ed0"
+  ],
+  "users": [
+    "ou_7ddf406b0a8370f6213aa15b1f3e44c1"
+  ],
+  "bot_open_id": "ou_11b0cb9b953148c4ed4bd856b40127c2",
+  "project_dir": ".",
+  "prompts_dir": "prompts",
+  "prompt_file": "instructions.md",
+  "turn_timeout": 600,
+  "api_timeout": 120,
+  "command_timeout": 60,
+  "tool_output_limit": 60000,
+  "max_tool_rounds": 40,
+  "max_parallel_tools": 8,
+  "api_base_url": "https://api.deepseek.com/",
+  "model": "deepseek-flash",
+  "api_key": "env:DEEPSEEK_API_KEY",
+  "skills": [
+    "westock-data",
+    "westock-screener"
+  ],
+  "timer_enabled": true,
+  "timer_message": "看看最近一段时间有没有对股市影响比较大的消息，有就整理成一条可以直接发到群里的消息，没有就只回一行 NO_PUSH。",
+  "state_file": "logs/state.db",
+  "app_id": "cli_aa14c31590f89d05",
+  "app_secret": "env:LARK_APP_SECRET",
+  "domain": "",
+  "log_file": "logs/bot.log",
+  "session_idle_timeout": 600
+}
